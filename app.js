@@ -1,3 +1,5 @@
+
+//quantity değeri bu fonksiyon ile alınır. ALınmazsa default olarak "1" yazılır.
 function getQuantity() {
     const quantityInput = document.querySelector('.js-qty__input');
     if (quantityInput) {
@@ -8,6 +10,7 @@ function getQuantity() {
     }
 }
 
+//size değeri bu fonksiyonla alınır. Bulunamazsa bilinmeyen ölçü olarak döner.
 function getSize() {
     const sizeSelect = document.querySelector('#SingleOptionSelector-0');
     if (sizeSelect) {
@@ -18,6 +21,7 @@ function getSize() {
     }
 }
 
+//bu fonksiyonla ürün detayları çekilir
 function fetchProductDetails() {
     const productMeta = window.ShopifyAnalytics.meta.product;
 
@@ -28,9 +32,9 @@ function fetchProductDetails() {
                 id: variant.id,
                 name: variant.name,
                 price: variant.price,
-                size: getSize(),
+                size: getSize(), //yukarıda yazılan fonksiyonla "size" değeri atanır.
                 color: variant.public_title.split(' / ')[1],
-                quantity: getQuantity()
+                quantity: getQuantity() //yukarıda yazılan fonksiyonla quantity değeri atanır.
             };
         } else {
             console.error("Belirtilen varyant bulunamadı.");
@@ -42,11 +46,12 @@ function fetchProductDetails() {
     }
 }
 
+//pop-up oluşturulma fonksiyonu
 function createPopup() {
     const product = fetchProductDetails();
     if (!product) return;
 
-    const popup = document.createElement("div");
+    const popup = document.createElement("div"); //pop-up için bir div elementi oluşturulur ve altına stilleri yazılır.
     popup.id = "productPopup";
     popup.style.position = "absolute";
     popup.style.top = "700%";
@@ -61,6 +66,7 @@ function createPopup() {
     popup.style.borderRadius = "8px";
     popup.style.boxSizing = "border-box";
 
+    //pop-up div'inin içeriği burada belirlenir, burada veriler dinamik olarak çekilir
     popup.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <div>
@@ -76,13 +82,13 @@ function createPopup() {
         </div>
     `;
 
-    // Belirtilen div içinde pop-up'ı ekle
+    // Sitedeki HTML elementi içerisine pop-up eklenir
     const container = document.querySelector('.nav-bar.small--hide');
     if (container) {
         container.appendChild(popup);
     } else {
         console.error("Belirtilen container bulunamadı.");
-        document.body.appendChild(popup); // Eğer container bulunamazsa, body'ye ekle
+        document.body.appendChild(popup); // Eğer container bulunamazsa, body'ye eklenir
     }
 
     document.getElementById("popupAddToCartButton").addEventListener("click", () => {
@@ -108,6 +114,8 @@ const observer = new MutationObserver(() => {
     }
 });
 
+
+//size ve quantity değişikliği buradan kontrol edilir.
 function observeQuantityAndSizeChanges() {
     const qtyButtons = document.querySelectorAll('.js-qty__adjust');
     const sizeSelect = document.querySelector('#SingleOptionSelector-0');
@@ -142,3 +150,7 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+/*Bu case yapılırken yazılımcı belirtilen süre içerisinde kendisine en uygun yöntemle yapmıştır. Web-scraping ve API'lerle alakalı dokümantasyonlar araştırılmış,
+case'de istenenlere göre uygun olan yöntem sayfanın kodlarından yola çıkmak olarak belirlenmiştir. Eğer yöntemde veya herhangi bir bölümde hata veya eksik varsa
+olumlu ya da olumsuz bir dönüşte bu hataların belirtilmesi -yazılımcının yanlışlarını görmesine yardımcı olacağı için- rica olunur. Şimdiden teşekkürler. */
