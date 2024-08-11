@@ -1,4 +1,4 @@
-function getQuantity() { //Quantity verileri bu fonksiyonla çekilir, eğer çekilemezse default olarak "1" basılır
+function getQuantity() {
     const quantityInput = document.querySelector('.js-qty__input');
     if (quantityInput) {
         return parseInt(quantityInput.value, 10) || 1; 
@@ -8,8 +8,7 @@ function getQuantity() { //Quantity verileri bu fonksiyonla çekilir, eğer çek
     }
 }
 
-
-function getSize() { //Sayfadaki size bilgilerini dinamik olarak çekmek için kullanılan fonksiyon. Herhangi bir hata olursa bilinmeyen size olarak "Unknown Size" yazılır.
+function getSize() {
     const sizeSelect = document.querySelector('#SingleOptionSelector-0');
     if (sizeSelect) {
         return sizeSelect.options[sizeSelect.selectedIndex].text; 
@@ -19,7 +18,7 @@ function getSize() { //Sayfadaki size bilgilerini dinamik olarak çekmek için k
     }
 }
 
-function fetchProductDetails() { //ürün bilgilerinin alındığı fonksiyon
+function fetchProductDetails() {
     const productMeta = window.ShopifyAnalytics.meta.product;
 
     if (productMeta && productMeta.variants && productMeta.variants.length > 0) {
@@ -29,9 +28,9 @@ function fetchProductDetails() { //ürün bilgilerinin alındığı fonksiyon
                 id: variant.id,
                 name: variant.name,
                 price: variant.price,
-                size: getSize(), //yukarıda bulunan size değeri burada kullanılır. 
-                color: variant.public_title.split(' / ')[1], // renk değeri buradan alınır.
-                quantity: getQuantity() // yukarıda bulunan renk değeri burada kullanılır.
+                size: getSize(),
+                color: variant.public_title.split(' / ')[1],
+                quantity: getQuantity()
             };
         } else {
             console.error("Belirtilen varyant bulunamadı.");
@@ -43,15 +42,14 @@ function fetchProductDetails() { //ürün bilgilerinin alındığı fonksiyon
     }
 }
 
-
-function createPopup() { //pop-up ekleme fonksiyonu
-    const product = fetchProductDetails(); //yukarıda ürün bilgileri alınan fonksiyon burada kullanılır.
+function createPopup() {
+    const product = fetchProductDetails();
     if (!product) return;
 
-    const popup = document.createElement("div"); //pop-up için html tag'i eklenmiş ve altındad stillendirmesi yapılmıştır.
+    const popup = document.createElement("div");
     popup.id = "productPopup";
-    popup.style.position = "fixed";
-    popup.style.bottom = "10px";
+    popup.style.position = "absolute";
+    popup.style.top = "700%";
     popup.style.right = "10px";
     popup.style.maxWidth = "90vw";
     popup.style.width = "300px";
@@ -63,10 +61,8 @@ function createPopup() { //pop-up ekleme fonksiyonu
     popup.style.borderRadius = "8px";
     popup.style.boxSizing = "border-box";
 
-
-    //pop-up'un içeriği bu kısımda oluşturulmuştur.
     popup.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: flex-start;"> 
+        <div style="display: flex; flex-direction: column; align-items: flex-start;">
             <div>
                 <h3 style="margin: 0; font-size: 16px; font-family: 'Unica One', sans-serif;">${product.name}</h3>
                 <p style="margin: 5px 0;">Price: $${(product.price / 100).toFixed(2)}</p>
@@ -80,9 +76,16 @@ function createPopup() { //pop-up ekleme fonksiyonu
         </div>
     `;
 
-    document.body.appendChild(popup);
+    // Belirtilen div içinde pop-up'ı ekle
+    const container = document.querySelector('.nav-bar.small--hide');
+    if (container) {
+        container.appendChild(popup);
+    } else {
+        console.error("Belirtilen container bulunamadı.");
+        document.body.appendChild(popup); // Eğer container bulunamazsa, body'ye ekle
+    }
 
-    document.getElementById("popupAddToCartButton").addEventListener("click", () => { //addToCart fonksiyonu burada çalışır.
+    document.getElementById("popupAddToCartButton").addEventListener("click", () => {
         const targetButton = document.getElementById("AddToCart-product-template");
         if (targetButton) {
             targetButton.click();
@@ -95,24 +98,21 @@ function createPopup() { //pop-up ekleme fonksiyonu
 // Pop-up oluşturulur.
 createPopup();
 
-
-const observer = new MutationObserver(() => { // pop-up dinamik verileri buradan alınır.
-
+const observer = new MutationObserver(() => {
     const product = fetchProductDetails();
     const sizeElement = document.getElementById('popupSize');
     const quantityElement = document.getElementById('popupQuantity');
     if (product && sizeElement && quantityElement) {
-        sizeElement.textContent = getSize(); 
-        quantityElement.textContent = getQuantity(); 
+        sizeElement.textContent = getSize();
+        quantityElement.textContent = getQuantity();
     }
 });
 
-//quantity ve size miktarı değiştiğinde buradan güncellenir.
 function observeQuantityAndSizeChanges() {
     const qtyButtons = document.querySelectorAll('.js-qty__adjust');
     const sizeSelect = document.querySelector('#SingleOptionSelector-0');
 
-    qtyButtons.forEach(button => { //quantity güncellenir
+    qtyButtons.forEach(button => {
         button.addEventListener('click', () => {
             const popupQuantityElement = document.getElementById('popupQuantity');
             if (popupQuantityElement) {
@@ -121,7 +121,7 @@ function observeQuantityAndSizeChanges() {
         });
     });
 
-    if (sizeSelect) {  //size güncellenir.
+    if (sizeSelect) {
         sizeSelect.addEventListener('change', () => {
             const popupSizeElement = document.getElementById('popupSize');
             if (popupSizeElement) {
@@ -133,7 +133,6 @@ function observeQuantityAndSizeChanges() {
 
 observeQuantityAndSizeChanges();
 
-// Responsive'lik kazanılması için mobil boyutlarda pop-up gizlenir, daha büyük boyutlarda görünür olur.
 const style = document.createElement('style');
 style.textContent = `
     @media (max-width: 700px) {
